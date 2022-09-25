@@ -58,6 +58,7 @@ package:
   patterns:
     - './build/index.js'
     - '!./src'
+    - '!./tests'
     - '!./*'
 
 functions:
