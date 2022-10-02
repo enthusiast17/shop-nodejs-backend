@@ -19,16 +19,28 @@ service: shop-nodejs-backend
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 frameworkVersion: '3'
-
+useDotenv: true
 provider:
   name: aws
   runtime: nodejs16.x
-
-# you can overwrite defaults here
   stage: dev
   region: eu-west-1
   httpApi:
     cors: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${env:PRODUCTS_TABLE_NAME}
+            - arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${env:STOCKS_TABLE_NAME}
 
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
@@ -60,6 +72,9 @@ package:
     - '!./src'
     - '!./tests'
     - '!./*'
+    - '!./node_modules'
+    - '!./dynamodb/client.js'
+    - '!./scripts/fill-tables.script.js'
 
 functions:
   getProductsList:
@@ -67,14 +82,17 @@ functions:
     events:
       - httpApi:
           path: /products
-          method: GET
+          method: get
+    environment: ${file(env.json)}
+
   getProductsById:
     handler: build/main.getProductsById
     events:
       - httpApi:
           path: /products/{id}
-          method: GET
-  
+          method: get
+    environment: ${file(env.json)}
+   
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

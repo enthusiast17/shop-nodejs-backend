@@ -1,9 +1,13 @@
 import { ProductsController } from "./products.controller.js";
 import { ProductsService } from "./products.service.js";
 import { SUCCESS_CODE } from "../constants/http.constants.js";
-import { normalizeError } from "../common/normalize.js";
+import { normalizeError } from "../common/normalize-error.js";
+import { StocksService } from "../stocks/stocks.service.js";
 
-const productsController = new ProductsController(new ProductsService());
+const productsController = new ProductsController(
+  new ProductsService(),
+  new StocksService(),
+);
 
 export const getProductsList = async (event) => {
   try {
