@@ -1,10 +1,15 @@
-import { ddbClient } from "../dynamodb/client.js";
+import dotenv from "dotenv";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { products } from "../src/products/products.mock.js";
 import { stocks } from "../src/stocks/stocks.mock.js";
 import { normalizeProductForDatabase } from "../src/products/products.normalize.js";
 import { normalizeStockForDatabase } from "../src/stocks/stocks.normalize.js";
 import { productsTableParams, stocksTableParams } from "../src/constants/params.constants.js";
+
+dotenv.config();
+
+const ddbClient = new DynamoDBClient({ region: process.env.REGION });
 
 (async () => {
   try {

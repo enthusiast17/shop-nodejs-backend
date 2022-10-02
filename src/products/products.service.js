@@ -1,12 +1,15 @@
 import { GetItemCommand, PutItemCommand, ScanCommand } from "@aws-sdk/client-dynamodb";
-import { ddbClient } from "../../dynamodb/client.js";
 import { productsTableParams } from "../constants/params.constants.js";
 import { normalizeProductForDatabase, normalizeProductFromDatabase } from "./products.normalize.js";
 
 export class ProductsService {
+  constructor(ddbClient) {
+    this.ddbClient = ddbClient;
+  }
+
   async getAll() {
     return (
-      await ddbClient.send(
+      await this.ddbClient.send(
         new ScanCommand(productsTableParams)
       )
     )?.Items?.map(
@@ -24,7 +27,7 @@ export class ProductsService {
       },
     };
     return normalizeProductFromDatabase(
-      (await ddbClient.send(new GetItemCommand(params)))?.Item ?? null
+      (await this.ddbClient.send(new GetItemCommand(params)))?.Item ?? null
     );
   }
 
@@ -36,7 +39,7 @@ export class ProductsService {
     if (onlyInput) {
       return input;
     }
-    return ddbClient.send(
+    return this.ddbClient.send(
       new PutItemCommand(input),
     );
   }

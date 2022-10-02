@@ -1,12 +1,15 @@
 import { GetItemCommand, PutItemCommand, ScanCommand } from "@aws-sdk/client-dynamodb";
-import { ddbClient } from "../../dynamodb/client.js";
 import { stocksTableParams } from "../constants/params.constants.js";
 import { normalizeStockForDatabase, normalizeStockFromDatabase } from "./stocks.normalize.js";
 
 export class StocksService {
+  constructor(ddbClient) {
+    this.ddbClient = ddbClient;
+  }
+
   async getAll() {
     return (
-      await ddbClient.send(
+      await this.ddbClient.send(
         new ScanCommand(stocksTableParams),
       )
     )?.Items?.map(
@@ -23,7 +26,7 @@ export class StocksService {
         },
       },
     };
-    const stock = await ddbClient.send(new GetItemCommand(params));
+    const stock = await this.ddbClient.send(new GetItemCommand(params));
     return normalizeStockFromDatabase(
       stock?.Item ?? null,
     );
@@ -37,6 +40,6 @@ export class StocksService {
     if (onlyInput) {
       return input;
     }
-    return ddbClient.send(new PutItemCommand(input));
+    return this.ddbClient.send(new PutItemCommand(input));
   }
 }

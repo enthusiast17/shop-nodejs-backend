@@ -1,14 +1,14 @@
 import { TransactWriteItemsCommand } from "@aws-sdk/client-dynamodb";
 import Ajv from "ajv";
 import { v4 as uuidv4 } from 'uuid';
-import { ddbClient } from "../../dynamodb/client.js";
 import { BadRequestHttpError, NotFoundHttpError } from "../common/httperror.js";
 import { productsSchema } from "./products.schema.js";
 
 export class ProductsController {
-  constructor(productsService, stocksService) {
+  constructor(productsService, stocksService, ddbClient) {
     this.productsService = productsService;
     this.stocksService = stocksService;
+    this.ddbClient = ddbClient;
     this.ajv = new Ajv();
     this.validate = this.ajv.compile(productsSchema);
   }
@@ -74,7 +74,7 @@ export class ProductsController {
       Put: transactItem,
     }));
 
-    await ddbClient.send(
+    await this.ddbClient.send(
       new TransactWriteItemsCommand({
         TransactItems: transactItems,
       }),
