@@ -11,6 +11,7 @@ const productsController = new ProductsController(
 
 export const getProductsList = async (event) => {
   try {
+    console.log(event);
     const result = await productsController.getAll();
 
     return {
@@ -24,8 +25,24 @@ export const getProductsList = async (event) => {
 
 export const getProductsById = async (event) => {
   try {
+    console.log(event);
     const { id } = event?.pathParameters;
     const result = await productsController.getById({ id });
+
+    return {
+      statusCode: SUCCESS_CODE,
+      body: JSON.stringify(result),
+    };
+  } catch (error) {
+    return normalizeError(error);
+  }
+};
+
+export const createProduct = async (event) => {
+  try {
+    console.log(event);
+    const product = JSON.parse(event?.body);
+    const result = await productsController.create(product);
 
     return {
       statusCode: SUCCESS_CODE,

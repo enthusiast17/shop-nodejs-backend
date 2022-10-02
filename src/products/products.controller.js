@@ -1,9 +1,16 @@
-import { NotFoundHttpError } from "../common/httperror.js";
+import { TransactWriteItemsCommand } from "@aws-sdk/client-dynamodb";
+import Ajv from "ajv";
+import { v4 as uuidv4 } from 'uuid';
+import { ddbClient } from "../../dynamodb/client.js";
+import { BadRequestHttpError, NotFoundHttpError } from "../common/httperror.js";
+import { productsSchema } from "./products.schema.js";
 
 export class ProductsController {
   constructor(productsService, stocksService) {
     this.productsService = productsService;
     this.stocksService = stocksService;
+    this.ajv = new Ajv();
+    this.validate = this.ajv.compile(productsSchema);
   }
 
   async getAll() {
@@ -43,5 +50,35 @@ export class ProductsController {
       };
     }
     return product;
+  }
+
+  async create(product) {
+    const isValid = this.validate(product);
+    if (!isValid) {
+      throw new BadRequestHttpError({
+        body: this.validate.errors,
+      });
+    }
+    const id = uuidv4();
+    const services = [
+      this.productsService.create({ ...product, id }, { onlyInput: true }),
+    ];
+    if (product?.count) {
+      services.push(
+        this.stocksService.create({ ...product, "product_id": id }, { onlyInput: true }),
+      );
+    }
+    const transactItems = (await Promise.all(
+      services,
+    ))?.map((transactItem) => ({
+      Put: transactItem,
+    }));
+
+    await ddbClient.send(
+      new TransactWriteItemsCommand({
+        TransactItems: transactItems,
+      }),
+    );
+    return "The product created!";
   }
 }

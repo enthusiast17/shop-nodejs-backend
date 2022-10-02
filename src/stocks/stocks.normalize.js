@@ -1,15 +1,26 @@
-export const normalizeStockForDatabase = (stock) => ({
-  "product_id": { S: stock["product_id"] },
-  count: { N: `${stock.count}` },
-});
+export const normalizeStockForDatabase = (stock) => {
+  const normalizedStock = {
+    "product_id": {
+      S: stock["product_id"],
+    },
+  };
+  if (stock?.count) {
+    normalizedStock.count = {
+      N: `${stock.count}`
+    };
+  }
+  return normalizedStock;
+};
 
 export const normalizeStockFromDatabase = (stock) => {
   if (!stock) {
     return null;
   }
-
-  return {
+  const normalizedStock = {
     "product_id": stock["product_id"]?.S,
-    count: stock?.count?.N,
   };
+  if (stock?.count?.N) {
+    normalizedStock.count = `${stock.count.N}`;
+  }
+  return normalizedStock;
 };

@@ -1,4 +1,6 @@
 import {
+  BAD_REQUEST_CODE,
+  BAD_REQUEST_MESSAGE,
   INTERNAL_ERROR_BODY,
   INTERNAL_ERROR_CODE,
   NOT_FOUND_CODE
@@ -27,6 +29,15 @@ export class InternalHttpError extends HttpError {
     super({
       statusCode: INTERNAL_ERROR_CODE,
       body: INTERNAL_ERROR_BODY,
+    });
+  }
+}
+
+export class BadRequestHttpError extends HttpError {
+  constructor({ body }) {
+    super({
+      statusCode: BAD_REQUEST_CODE,
+      body: body ?? BAD_REQUEST_MESSAGE,
     });
   }
 }

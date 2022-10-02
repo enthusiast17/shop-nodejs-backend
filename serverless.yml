@@ -93,6 +93,14 @@ functions:
           method: get
     environment: ${file(env.json)}
    
+  createProduct:
+    handler: build/main.createProduct
+    events:
+      - httpApi:
+          path: /products
+          method: post
+    environment: ${file(env.json)}
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
