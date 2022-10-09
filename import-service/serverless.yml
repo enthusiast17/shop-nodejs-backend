@@ -1,0 +1,39 @@
+service: import-service-nodejs-backend
+
+frameworkVersion: '3'
+useDotenv: true
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: dev
+  region: eu-west-1
+  httpApi:
+    cors: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: 's3:ListBucket'
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - 's3:*'
+          Resource:
+            - 'arn:aws:s3:::${env:BUCKET}/*'
+
+package:
+  individually: true 
+  patterns:
+    - './build/main.js'
+    - '!./src'
+    - '!./*'
+    - '!./node_modules'
+
+functions:
+  importProductsFile :
+    handler: build/main.importProductsFile
+    events:
+      - httpApi:
+          path: /import/{name}
+          method: get
+    environment: ${file(env.json)}

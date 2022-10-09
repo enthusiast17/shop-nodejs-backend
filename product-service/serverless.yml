@@ -68,7 +68,7 @@ provider:
 package:
   individually: true 
   patterns:
-    - './build/index.js'
+    - './build/main.js'
     - '!./src'
     - '!./tests'
     - '!./*'

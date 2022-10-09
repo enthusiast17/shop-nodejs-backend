@@ -1,0 +1,22 @@
+{
+  "name": "import-service",
+  "version": "1.0.0",
+  "description": "An import service",
+  "type": "module",
+  "scripts": {
+    "build": "webpack --mode=production",
+    "deploy": "serverless deploy"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.186.0",
+    "@aws-sdk/s3-request-presigner": "^3.186.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.3",
+    "serverless": "^3.22.0",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
+  }
+}
