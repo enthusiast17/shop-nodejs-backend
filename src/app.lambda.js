@@ -1,1 +1,5 @@
-export { getProductsList, getProductsById } from "./products/products.lambda.js";
+export {
+  getProductsList,
+  getProductsById,
+  createProduct,
+} from "./products/products.lambda.js";
