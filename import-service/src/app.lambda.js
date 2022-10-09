@@ -1,1 +1,1 @@
-export { importProductsFile } from "./import/import.lambda.js";
+export { importProductsFile, importFileParser } from "./import/import.lambda.js";

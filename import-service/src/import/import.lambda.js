@@ -13,13 +13,22 @@ const getImportController = () => {
   return { s3Client, importController };
 };
 
-export const importProductsFile = async(event) => {
+export const importProductsFile = async (event) => {
   try {
     const { importController } = getImportController();
     const { name } = event?.pathParameters;
-    const signedUrl = await importController.createSignedUrl({ name });
+    const signedUrl = await importController.create({ name });
     return normalizeResponse({ body: signedUrl });
   } catch (error) {
     return normalizeError(error);
   }
 };
+
+export const importFileParser = async (event) => {
+  try {
+    const { importController } = getImportController();
+    await importController.parse({ records: event.Records });
+  } catch (error) {
+    return normalizeError(error);
+  }
+}
