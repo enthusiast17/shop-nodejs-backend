@@ -1,7 +1,7 @@
 {
   "name": "shop-nodejs-backend",
   "version": "1.0.0",
-  "description": "A backend application for shop",
+  "description": "A product service",
   "type": "module",
   "scripts": {
     "test": "node tests/tests.js",
