@@ -8,20 +8,21 @@ import { StocksService } from "../stocks/stocks.service.js";
 
 dotenv.config();
 
-export const getProductsController = () => {
+export const getControllers = () => {
   const ddbClient = new DynamoDBClient({ region: process.env.REGION });
-
-  return new ProductsController(
+  const productsController = new ProductsController(
     new ProductsService(ddbClient),
     new StocksService(ddbClient),
     ddbClient,
   );
+
+  return { productsController };
 };
 
 export const getProductsList = async (event) => {
   try {
     console.log(event);
-    const productsController = getProductsController();
+    const { productsController } = getControllers();
     const result = await productsController.getAll();
 
     return {
@@ -37,7 +38,7 @@ export const getProductsById = async (event) => {
   try {
     console.log(event);
     const { id } = event?.pathParameters;
-    const productsController = getProductsController();
+    const { productsController } = getControllers();
     const result = await productsController.getById({ id });
 
     return {
@@ -53,7 +54,7 @@ export const createProduct = async (event) => {
   try {
     console.log(event);
     const product = JSON.parse(event?.body);
-    const productsController = getProductsController();
+    const { productsController } = getControllers();
     const result = await productsController.create(product);
 
     return {
@@ -64,3 +65,27 @@ export const createProduct = async (event) => {
     return normalizeError(error);
   }
 };
+
+export const catalogBatchProcess = async (event) => {
+  try {
+    console.log(event);
+    const { productsController } = getControllers();
+    const result = await Promise.allSettled(
+      event?.Records?.map(
+        async (record) => {
+          const product = JSON.parse(
+            record?.body?.replace(/[\u200B-\u200D\uFEFF]/g, ""),
+          );
+          await productsController.create({
+            ...product,
+            price: +product?.price,
+            count: +product?.count,
+          });
+        }  
+      ),
+    );
+    console.log(result);
+  } catch (error) {
+    return normalizeError(error);
+  }
+}

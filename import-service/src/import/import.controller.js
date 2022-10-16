@@ -2,8 +2,9 @@ import csv from "csv-parser";
 import { importBucketParams } from "../constants/params.constants.js";
 
 export class ImportController {
-  constructor(importService) {
+  constructor(importService, queueService) {
     this.importService = importService;
+    this.queueService = queueService;
   }
 
   async create({ name }) {
@@ -14,23 +15,20 @@ export class ImportController {
   async parse({ records }) {
     await Promise.all(records.map(async (record) => {
       const key = record?.s3?.object?.key;
-      console.log(`Record key: ${key}`);
       const file = await this.importService.read({
         key,
       });
-      const readStream = file.Body;
+      const readStream = file.Body.pipe(csv());
       await new Promise((resolve, reject) => {
-        const chunks = [];
-        readStream.pipe(csv());
         readStream.on("data", (chunk) => {
-          chunks.push(chunk);
-          console.log(`Chunk: ${chunk}`);
+          this.queueService.create({
+            messageBody: chunk,
+          });
         });
         readStream.on("reject", (error) => {
           reject(`Reject: ${error}`);
         });
         readStream.on("end", () => {
-          console.log(`Chunks: ${chunks}`);
           Promise.all([
             this.importService.copy({
               key: key.replace("uploaded", "parsed"),
