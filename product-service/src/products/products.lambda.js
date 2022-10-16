@@ -5,6 +5,8 @@ import { ProductsService } from "./products.service.js";
 import { SUCCESS_CODE } from "../constants/http.constants.js";
 import { normalizeError } from "../common/normalize-error.js";
 import { StocksService } from "../stocks/stocks.service.js";
+import { SNSClient } from "@aws-sdk/client-sns";
+import { SubscriptionService } from "../subscription/subscription.service.js";
 
 dotenv.config();
 
@@ -17,6 +19,14 @@ export const getControllers = () => {
   );
 
   return { productsController };
+};
+
+export const getServices = () => {
+  const snsClient = new SNSClient({ region: process.env.REGION });
+  const subscriptionService = new SubscriptionService(snsClient);
+  return {
+    subscriptionService,
+  };
 };
 
 export const getProductsList = async (event) => {
@@ -70,13 +80,14 @@ export const catalogBatchProcess = async (event) => {
   try {
     console.log(event);
     const { productsController } = getControllers();
+    const { subscriptionService } = getServices();
     const result = await Promise.allSettled(
       event?.Records?.map(
         async (record) => {
           const product = JSON.parse(
             record?.body?.replace(/[\u200B-\u200D\uFEFF]/g, ""),
           );
-          await productsController.create({
+          return productsController.create({
             ...product,
             price: +product?.price,
             count: +product?.count,
@@ -85,6 +96,10 @@ export const catalogBatchProcess = async (event) => {
       ),
     );
     console.log(result);
+    await subscriptionService.create({
+      subject: "products-service | catalogBatchProcess",
+      message: result,
+    });
   } catch (error) {
     return normalizeError(error);
   }

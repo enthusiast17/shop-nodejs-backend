@@ -27,6 +27,7 @@ provider:
           Resource:
             - '${cf:products-service-dev.getCatalogItemsQueueArn}'
   environment:
+    - ${file(env.json)}
     SQS_URL:
       - '${cf:products-service-dev.getCatalogItemsQueueRef}'
 
@@ -45,7 +46,6 @@ functions:
       - httpApi:
           path: /import/{name}
           method: get
-    environment: ${file(env.json)}
   importFileParser:
     handler: build/main.importFileParser
     events:
@@ -55,4 +55,3 @@ functions:
           rules:
             - prefix: uploaded/
           existing: true
-    environment: ${file(env.json)}

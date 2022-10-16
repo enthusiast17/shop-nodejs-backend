@@ -28,13 +28,33 @@ provider:
             - sqs:*
           Resource:
             Fn::GetAtt: [ catalogItemsQueue, Arn ]
+        - Effect: Allow
+          Action:
+            - sns:*
+          Resource:
+            Ref: createProductTopic
+  environment:
+    SNS_ARN:
+        Ref: createProductTopic
 
 resources:
   Resources:
     catalogItemsQueue:
-      Type: 'AWS::SQS::Queue'
+      Type: AWS::SQS::Queue
       Properties:
         QueueName: catalogItemsQueue
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: createProductTopic
+    createProductSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: aws.sns.serverless@gmail.com
+        Protocol: email
+        TopicArn:
+          Ref: createProductTopic
+
   Outputs:
     getCatalogItemsQueueRef:
       Value:
