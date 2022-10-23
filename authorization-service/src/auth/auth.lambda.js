@@ -10,12 +10,10 @@ export const basicAuthorizer = (event, context, callback) => {
       new PolicyService(),
     );
 
-    console.log("EVENT: ", event);
     const policy = authController.validate({
       authorization: event?.headers?.authorization,
       routeArn: event?.routeArn,
     });
-    console.log("Policy", policy);
     callback(null, policy);
   } catch (error) {
     callback(UNAUTHORIZED_BODY);
