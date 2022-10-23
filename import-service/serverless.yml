@@ -1,4 +1,5 @@
-service: import-service-nodejs-backend
+app: shop-nodejs-backend
+service: import-service
 
 frameworkVersion: '3'
 useDotenv: true
@@ -20,6 +21,14 @@ provider:
             - 's3:*'
           Resource:
             - 'arn:aws:s3:::${env:BUCKET}/*'
+        - Effect: Allow
+          Action:
+            - sqs:*
+          Resource:
+            - '${cf:products-service-dev.getCatalogItemsQueueArn}'
+  environment:
+    SQS_URL:
+      - '${cf:products-service-dev.getCatalogItemsQueueRef}'
 
 package:
   individually: true 
