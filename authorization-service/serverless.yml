@@ -1,0 +1,30 @@
+app: shop-nodejs-backend
+service: authorization-service
+frameworkVersion: '3'
+useDotenv: true
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: dev
+  region: eu-west-1
+
+package:
+  individually: true 
+  patterns:
+    - './build/main.js'
+    - '!./src'
+    - '!./*'
+    - '!./node_modules'
+
+resources:
+  Outputs:
+    basicAuthorizerArn:
+      Value:
+        Fn::GetAtt: [ BasicAuthorizerLambdaFunction, Arn ]
+      Export:
+        Name: basicAuthorizerArn
+
+functions:
+  basicAuthorizer:
+    handler: build/main.basicAuthorizer
+    environment: ${file(env.json)}

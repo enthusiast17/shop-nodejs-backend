@@ -10,6 +10,14 @@ provider:
   region: eu-west-1
   httpApi:
     cors: true
+    authorizers:
+      basicAuthorizer:
+        type: request
+        functionArn: '${cf:authorization-service-dev.basicAuthorizerArn}'
+        identitySource: $request.header.Authorization
+        resultTtlInSeconds: 0
+        enableSimpleResponses: true
+        managedExternally: true
   iam:
     role:
       statements:
@@ -45,6 +53,8 @@ functions:
       - httpApi:
           path: /import/{name}
           method: get
+          authorizer:
+            name: basicAuthorizer
     environment: ${file(env.json)}
   importFileParser:
     handler: build/main.importFileParser
